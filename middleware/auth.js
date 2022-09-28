@@ -1,11 +1,11 @@
 "use strict";
 
+const { is } = require("express/lib/request");
 /** Convenience middleware to handle common auth cases in routes. */
 
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
 const { UnauthorizedError } = require("../expressError");
-
 
 /** Middleware: Authenticate user.
  *
@@ -44,16 +44,22 @@ function ensureLoggedIn(req, res, next) {
 
 function ensureAdmin(req, res, next) {
   try {
-    if(!res.locals.user || !res.locals.user.isAdmin === true) throw new UnauthorizedError();
+    if(!res.locals.user || !isAdminUser(res.locals.user)) throw new UnauthorizedError();
     return next();
   } catch(err) {
     return next(err);
   }
 };
 
-function ensureAdminOrUser(req, res, next) {
+function isAdminUser(user) {
+  if (!user.isAdmin) return false;
+  return true;
+}
+
+function ensureAdminOrCorrectUser(req, res, next) {
+  const { user } = res.locals
   try {
-    if(!res.locals.user.isAdmin === true && res.locals.user.username !== req.params.username) throw new UnauthorizedError(`Unauthorized; must be admin or user ${req.body.username} to complete action`);
+    if( !isAdminUser(user) && user.username !== req.params.username) throw new UnauthorizedError();
     return next();
   } catch(err) {
     return next(err)
@@ -65,5 +71,5 @@ module.exports = {
   authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
-  ensureAdminOrUser
+  ensureAdminOrCorrectUser
 };
