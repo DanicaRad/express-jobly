@@ -70,7 +70,7 @@ class Company {
     const values = [];
     const queryStringArr = [];
     if(data.name) {
-      // case insensitive, matching companies with name = or containing data.name
+      // case insensitive, finds companies where name = or includes data.name
       values.push(`%${data.name}%`);
       queryStringArr.push(`name ILIKE $${values.length} `);
     }
@@ -82,8 +82,7 @@ class Company {
       values.push(+data.maxEmployees);
       queryStringArr.push(`num_employees <= $${values.length} `);
     }
-    // if no valid filters found, return all jobs, otherwise format paramaterized query string with filters
-
+    // if no valid filters found, return all companies, else format paramaterized query string with filters
     const queryString = values.length > 0 ? "WHERE " + queryStringArr.join("AND ") + " ORDER BY name" : " ORDER BY name"    
     
     const results = await db.query(baseQuery + queryString, [...values]);

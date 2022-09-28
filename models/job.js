@@ -93,8 +93,7 @@ class Job {
         queryStringArr.push(`equity >= $${validValues.length} `);
     }
 
-    // if no valid filters found, return all jobs, otherwise format paramaterized query string with filters
-
+    // if no valid filters found, return all jobs, else format paramaterized query string with filters
     const queryString = validValues.length > 0 ? "WHERE " + queryStringArr.join("AND ") + " ORDER BY title" : " ORDER BY title"    
     
     const results = await db.query(baseQuery + queryString, [...validValues]);
